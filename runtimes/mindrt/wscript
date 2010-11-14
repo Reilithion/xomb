@@ -1,0 +1,29 @@
+#! /usr/bin/env python
+# encoding: utf-8
+
+def build(bld):
+	drt_env = bld.env.derive()
+	drt_env.DFLAGS = ['-nodefaultlib']
+	drt_env.LINKFLAGS = ['-nodefaultlib', '-L-nostdlib', '-L-nodefaultlibs']
+	mindrt_sources = ['object.d', 'dinvariant.d', 'moduleinit.d', 'dstubs.d', 'util.d', 'dstatic.d', 'error.d', 'exception.d', 'array.d', 'assocarray.d', 'lifetime.d', 'gc.d', 'vararg.d'] + bld.path.ant_glob('typeinfo/ti_*.d')
+	
+	mindrt_objs = bld(features     = 'd',
+		source       = mindrt_sources,
+		includes     = ['.', '..'],
+		env          = drt_env,
+		name         = 'mindrt_objs')
+	
+	mindrt = bld(features     = 'd dstlib',
+		use          = 'mindrt_objs',
+		env          = drt_env,
+		name         = 'mindrt',
+		target       = 'mindrt')
+	
+	drt0_sources = ['entry.d']
+	bld(features     = 'd dstlib',
+		source       = drt0_sources,
+		use          = 'mindrt_objs',
+		includes     = ['.', '..', '../..'],
+		env          = drt_env,
+		name         = 'drt0',
+		target       = 'drt0')
